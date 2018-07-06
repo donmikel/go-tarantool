@@ -123,6 +123,8 @@ type Connection struct {
 
 	shard      []connShard
 	dirtyShard chan uint32
+	// handle is user specified value, that could be set or retrivied with SetHandle/Handle() methods
+	handle interface{}
 
 	control chan struct{}
 	rlimit  chan struct{}
@@ -192,8 +194,6 @@ type Opts struct {
 	// Notify is a channel which receives notifications about Connection status
 	// changes.
 	Notify chan<- ConnEvent
-	// Handle is user specified value, that could be retrivied with Handle() method
-	Handle interface{}
 	// Logger is user specified logger used for error messages
 	Logger Logger
 }
@@ -342,8 +342,15 @@ func (conn *Connection) LocalAddr() string {
 }
 
 // Handle returns user specified handle from Opts
+func (conn *Connection) SetHandle(handle interface{}) {
+	conn.mutex.Lock()
+	conn.handle = handle
+	conn.mutex.Unlock()
+}
+
+// Handle returns user specified handle from Opts
 func (conn *Connection) Handle() interface{} {
-	return conn.opts.Handle
+	return conn.handle
 }
 
 func (conn *Connection) dial() (err error) {
