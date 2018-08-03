@@ -399,7 +399,7 @@ func (conn *Connection) dial() (err error) {
 		return
 	}
 	conn.Greeting.Version = bytes.NewBuffer(greeting[:64]).String()
-	conn.Greeting.UUID = bytes.NewBuffer(greeting[(64 - UUIDStrLen):64]).String()
+	conn.Greeting.UUID = bytes.NewBuffer(greeting[(61 - UUIDStrLen):62]).String()
 	conn.Greeting.auth = bytes.NewBuffer(greeting[64:108]).String()
 
 	// Auth
