@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"gopkg.in/vmihailenco/msgpack.v2"
 	"io"
 	"log"
 	"net"
@@ -13,6 +12,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"gopkg.in/vmihailenco/msgpack.v2"
 )
 
 const requestsMap = 128
@@ -43,6 +44,8 @@ const (
 	// LogUnexpectedResultId is logged when response with unknown id were received.
 	// Most probably it is due to request timeout.
 	LogUnexpectedResultId
+	// UUIDStrLen is length of server UUID
+	UUIDStrLen = 36
 )
 
 // ConnEvent is sent throw Notify channel specified in Opts
@@ -149,6 +152,7 @@ type connShard struct {
 // Greeting is a message sent by tarantool on connect.
 type Greeting struct {
 	Version string
+	UUID    string
 	auth    string
 }
 
@@ -395,6 +399,7 @@ func (conn *Connection) dial() (err error) {
 		return
 	}
 	conn.Greeting.Version = bytes.NewBuffer(greeting[:64]).String()
+	conn.Greeting.UUID = bytes.NewBuffer(greeting[(64 - UUIDStrLen):64]).String()
 	conn.Greeting.auth = bytes.NewBuffer(greeting[64:108]).String()
 
 	// Auth
